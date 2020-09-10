@@ -3,18 +3,24 @@
 " vim: et ts=2 sts=2 sw=2
 
 scriptencoding utf-8
+let s:spc = g:airline_symbols.space
 
-if !exists('g:loaded_battery')
+if !exists('*battery#backend')
   finish
 endif
 
-function! airline#extensions#battery#status(...) abort
-  if !exists('g:battery#update_statusline') 
-    let g:battery#update_statusline = 1
-  endif
-  let w:airline_section_z = '%{battery#component()}'
+function! airline#extensions#battery#init(ext)
+  call airline#parts#define_raw('battery', '%{airline#extensions#battery#get_battery()}')
+  call a:ext.add_statusline_func('airline#extensions#battery#apply')
 endfunction
 
-function! airline#extensions#battery#init(ext) abort
-  call a:ext.add_statusline_func('airline#extensions#battery#status')
+function! airline#extensions#battery#apply(...)
+  let w:airline_section_x = get(w:, 'airline_section_c', g:airline_section_c)
+  let w:airline_section_x .= '%{airline#extensions#battery#get_battery()}'
 endfunction
+
+function! airline#extensions#battery#get_battery()
+  let battery = battery#component()
+  return battery
+endfunction
+
